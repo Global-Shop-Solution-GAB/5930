@@ -1,0 +1,102 @@
+Program.Sub.ScreenSU.Start
+Gui.ForecastCust..Create
+Gui.ForecastCust..Caption("Forecast Customer")
+Gui.ForecastCust..Size(4845,1815)
+Gui.ForecastCust..MinX(0)
+Gui.ForecastCust..MinY(0)
+Gui.ForecastCust..Position(0,0)
+Gui.ForecastCust..BackColor(-2147483633)
+Gui.ForecastCust..MaxButton(False)
+Gui.ForecastCust..MinButton(False)
+Gui.ForecastCust..MousePointer(0)
+Gui.ForecastCust..Event(UnLoad,ForecastCust_UnLoad)
+Gui.ForecastCust.cmdProcess.Create(Button)
+Gui.ForecastCust.cmdProcess.Size(855,375)
+Gui.ForecastCust.cmdProcess.Position(3195,330)
+Gui.ForecastCust.cmdProcess.Caption("Process")
+Gui.ForecastCust.cmdProcess.Event(Click,cmdProcess_Click)
+Gui.ForecastCust.cmdProcess.TabStop(True)
+Gui.ForecastCust.cmdProcess.TabIndex(2)
+Gui.ForecastCust.lblCust.Create(Label,"Customer Code:",True,1350,255,0,165,420,True,0,"Arial",8,-2147483633,0)
+Gui.ForecastCust.txtCust.Create(TextBox,"",True,1215,300,0,1515,345,True,0,"Arial",8,-2147483643,1)
+Gui.ForecastCust.txtCust.MaxLength(6)
+Gui.ForecastCust.txtCust.TabStop(True)
+Gui.ForecastCust.txtCust.TabIndex(1)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'03/26/2020 RGRC
+
+Gui.ForecastCust..Show
+
+Program.Sub.Main.End
+
+Program.Sub.cmdProcess_Click.Start
+V.Local.sSql.Declare(String)
+V.Local.sJob.Declare(String)
+V.Local.sFile.Declare(String)
+V.Local.bFile.Declare(Boolean)
+V.Local.bTable.Declare(Boolean)
+
+V.Local.sSql_0.Declare(String)
+V.Local.sSql_1.Declare(String)
+
+Gui.ForecastCust..Visible(False)
+
+F.Intrinsic.String.Build("Select ID FROM V_Forecast_Summary Where Customer = '{0}'  order by ID",V.Screen.ForecastCust!txtCust.Text,V.Local.sSql_0)
+F.Intrinsic.String.Build("Select JOB From V_FORECAST_HEADER WHERE JOB<> '' AND CUSTOMER='{0}' ORDER BY JOB",V.Screen.ForecastCust!txtCust.Text,V.Local.sSql_1)
+
+'Remove forecast.txt
+F.Intrinsic.String.Build("{0}\forecast.txt",V.Caller.FilesDir,V.Local.sFile)
+F.Intrinsic.File.Exists(V.Local.sFile,V.Local.bFile)
+F.Intrinsic.Control.If(V.Local.bFile,=,True)
+	F.Intrinsic.File.DeleteFile(V.Local.sFile)
+F.Intrinsic.Control.EndIf
+
+F.ODBC.Connection!Conx.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass,7200)
+
+F.Intrinsic.String.Build("DELETE FROM FORECAST_DETAIL WHERE ID IN({0})",V.Local.sSql_0,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_XREF WHERE ID IN({0})",V.Local.sSql_0,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_SUMMARY WHERE ID IN({0})",V.Local.sSql_0,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_COMMENTS WHERE ID IN({0})",V.Local.sSql_0,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_HISTORY WHERE ID IN({0})",V.Local.sSql_0,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE from SCHED_WO_SUPP WHERE WO IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST WHERE SCHED_JOB IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_REQ WHERE FO_CUSTOMER ='{0}'",V.Screen.ForecastCust!txtCust.Text,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_HEADER WHERE JOB IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_OPS WHERE JOB IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM FORECAST_SUPP WHERE WO IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM APSV3_JBLINES WHERE JOB IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM APSV3_JBMASTER WHERE JOB IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+F.Intrinsic.String.Build("DELETE FROM APSV3_UBDETAIL WHERE JOB IN({0})",V.Local.sSql_1,V.Local.sSql)
+F.ODBC.Connection!Conx.Execute(V.Local.sSql)
+
+F.ODBC.Connection!Conx.Close
+F.Intrinsic.Control.End
+
+Program.Sub.cmdProcess_Click.End
+
+Program.Sub.ForecastCust_UnLoad.Start
+F.Intrinsic.Control.End
+
+Program.Sub.ForecastCust_UnLoad.End
+
+Program.Sub.Comments.Start
+${$0$}$$}$$}$12:00:00 AM$}$False
+Program.Sub.Comments.End
